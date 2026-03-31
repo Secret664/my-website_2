@@ -95,3 +95,17 @@ a:hover {
   color: #777;
   font-size: 14px;
 }
+
+.badge {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.badge.ok {
+  background: #e6f4ea;
+}
+
+.badge.ng {
+  background: #fdecea;
+}
