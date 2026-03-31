@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>時間帯トレード 完全パターン参照ガイド</title>
+<style>
+  :root {
+    --color-text-primary: #1a1a18;
+    --color-text-secondary: #5f5e5a;
+    --color-text-tertiary: #888780;
+    --color-text-info: #0c447c;
+    --color-text-success: #085041;
+    --color-text-warning: #633806;
+    --color-text-danger: #791f1f;
+    --color-background-primary: #ffffff;
+    --color-background-secondary: #f1efe8;
+    --color-background-info: #e6f1fb;
+    --color-background-success: #e1f5ee;
+    --color-background-warning: #faeeda;
+    --color-background-danger: #fcebeb;
+    --color-border-tertiary: rgba(0,0,0,0.12);
+    --color-border-secondary: rgba(0,0,0,0.25);
+    --color-border-info: #185fa5;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-text-primary: #e8e6df;
+      --color-text-secondary: #b4b2a9;
+      --color-text-tertiary: #888780;
+      --color-text-info: #85b7eb;
+      --color-text-success: #5dcaa5;
+      --color-text-warning: #fac775;
+      --color-text-danger: #f09595;
+      --color-background-primary: #1e1e1c;
+      --color-background-secondary: #2c2c2a;
+      --color-background-info: #042c53;
+      --color-background-success: #04342c;
+      --color-background-warning: #412402;
+      --color-background-danger: #501313;
+      --color-border-tertiary: rgba(255,255,255,0.12);
+      --color-border-secondary: rgba(255,255,255,0.25);
+      --color-border-info: #378add;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-text-primary);
+    background: var(--color-background-primary);
+    padding: 1.5rem;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 20px; font-weight: 500; margin-bottom: .4rem; }
+  .subtitle { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1.2rem; }
+  .top-nav { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.2rem; }
+  .nav-btn {
+    font-size: 12px; padding: 5px 10px;
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer; transition: all .15s;
+    font-family: var(--font-sans);
+  }
+  .nav-btn:hover { background: var(--color-background-secondary); }
+  .nav-btn.active {
+    background: var(--color-background-info);
+    border-color: var(--color-border-info);
+    color: var(--color-text-info);
+    font-weight: 500;
+  }
+  .card {
+    background: var(--color-background-primary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    padding: 1.1rem 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .card-title { font-size: 15px; font-weight: 500; margin-bottom: .6rem; }
+  .badge {
+    display: inline-block; font-size: 11px; font-weight: 500;
+    padding: 2px 8px; border-radius: 4px;
+    margin-right: 6px; margin-bottom: 4px;
+  }
+  .b-teal { background: var(--color-background-success); color: var(--color-text-success); }
+  .b-amber { background: var(--color-background-warning); color: var(--color-text-warning); }
+  .b-red { background: var(--color-background-danger); color: var(--color-text-danger); }
+  .b-info { background: var(--color-background-info); color: var(--color-text-info); }
+  .b-gray { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+  .b-purple { background: #EEEDFE; color: #3C3489; }
+  @media (prefers-color-scheme: dark) { .b-purple { background: #26215C; color: #CECBF6; } }
+  .row3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-bottom: 10px; }
+  .row2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin-bottom: 10px; }
+  @media (max-width: 600px) {
+    .row3 { grid-template-columns: 1fr; }
+    .row2 { grid-template-columns: 1fr; }
+  }
+  .mini {
+    background: var(--color-background-secondary);
+    border-radius: var(--border-radius-md);
+    padding: .7rem .85rem;
+  }
+  .mini-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 3px; }
+  .mini-val { font-size: 13px; font-weight: 500; line-height: 1.5; }
+  .algo {
+    background: var(--color-background-secondary);
+    border-radius: var(--border-radius-md);
+    padding: .8rem 1rem;
+    font-size: 12.5px; line-height: 1.8;
+    color: var(--color-text-secondary);
+  }
+  .algo b { color: var(--color-text-primary); font-weight: 500; }
+  .step-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+  .step-num {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--color-background-info); color: var(--color-text-info);
+    font-size: 11px; font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .psy {
+    border-left: 2px solid var(--color-border-info);
+    padding-left: .75rem; font-size: 12.5px;
+    color: var(--color-text-secondary); line-height: 1.7;
+    margin-bottom: .8rem;
+  }
+  .warn {
+    border-left: 2px solid var(--color-border-danger);
+    padding-left: .75rem; font-size: 12px;
+    color: var(--color-text-danger); line-height: 1.7;
+  }
+  .section-label {
+    font-size: 11px; font-weight: 500;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase; letter-spacing: .05em;
+    margin-bottom: .4rem;
+  }
+  hr { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: .8rem 0; }
+  .page-title-area { margin-bottom: 1.5rem; }
+</style>
+</head>
+<body>
+
+<div class="page-title-area">
+  <h1>時間帯トレード 完全パターン参照ガイド</h1>
+  <div class="subtitle">エリオット波動 × 時間帯分析 — パターン①〜⑯ + ドル円東京特化</div>
+</div>
+
+<div class="top-nav" id="nav"></div>
+<div id="content"></div>
+
+<script>
+const groups = [
+{
+  id:'philosophy', label:'基盤思想', color:'b-gray',
+  title:'全パターン共通の基盤思想',
+  content: () => `
+    <div class="card">
+      <div class="section-label">核心公式</div>
+      <div style="font-size:18px;font-weight:500;margin-bottom:.8rem">利益 ＝ 方向（波動）× エネルギー（参加人数）</div>
+      <div class="psy">エリオット波動が「方向」を決め、時間帯が「エネルギー＝参加者の密度」を決める。どちらか欠けると勝率が落ちる。両方揃った瞬間だけ撃つのが全手法の原則。</div>
+      <div class="row3">
+        <div class="mini"><div class="mini-label">絶対優先順位</div><div class="mini-val">エリオット波動<br>＞ 時間帯パターン</div></div>
+        <div class="mini"><div class="mini-label">大衆心理の正体</div><div class="mini-val">相場＝多数決<br>長期勢が短期を支配</div></div>
+        <div class="mini"><div class="mini-label">最重要ルール</div><div class="mini-val">迷ったら見送り<br>条件が揃ったとき撃つ</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">3軸の役割分担</div>
+      <div class="row3">
+        <div class="mini"><div class="mini-label">エリオット波動（2〜3ヶ月）</div><div class="mini-val">方向の決定者<br>大口・機関が主体<br>絶対に逆らわない</div></div>
+        <div class="mini"><div class="mini-label">時間帯（24時間）</div><div class="mini-val">エネルギーの計測器<br>東京→欧州→NYの<br>役割を読む</div></div>
+        <div class="mini"><div class="mini-label">インジケーター</div><div class="mini-val">エントリータイミング<br>ストキャス・MACD<br>最後の引き金</div></div>
+      </div>
+      <hr>
+      <div class="section-label">各時間帯の役割</div>
+      <div class="row3">
+        <div class="mini"><div class="mini-label">東京（9〜15時）</div><div class="mini-val">状態の確認・仮説生成<br>ブレイク判定の起点<br>基本はトレードしない</div></div>
+        <div class="mini"><div class="mini-label">欧州（15〜21時）</div><div class="mini-val">実行部隊<br>初動・押し目・共通部分<br>メインの戦場</div></div>
+        <div class="mini"><div class="mini-label">NY（21時〜）</div><div class="mini-val">答え合わせ<br>決済フロー or 再加速<br>ほぼ1択になる場面</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">通貨ペア選定（全パターン共通前提）</div>
+      <div class="row2">
+        <div class="mini"><div class="mini-label">推奨（高流動性）</div><div class="mini-val">USD/JPY, GBP/USD<br>GBP/JPY, EUR/USD<br>EUR/JPY</div></div>
+        <div class="mini"><div class="mini-label">除外（低流動性）</div><div class="mini-val">NZD/CAD, AUD/CHF<br>NZD/CHF, EUR/GBP<br>マイナー×マイナー全般</div></div>
+      </div>
+      <div class="warn" style="margin-top:.6rem">時間帯トレードは「時間帯 × 流動性」の掛け算。参加者が少ない通貨では大衆心理が発動せず、どのパターンも機能しない。</div>
+    </div>
+  `
+},
+{
+  id:'p12', label:'①② 欧州順張り', color:'b-teal',
+  title:'パターン①② ── 欧州トレンド継続取り',
+  content: () => `
+    <div class="card">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:.8rem">
+        <span class="badge b-teal">東京：ブレイクあり</span>
+        <span class="badge b-teal">欧州：同方向継続</span>
+        <span class="badge b-gray">NY：保有 or 利確</span>
+        <span class="badge b-info">難易度：入門</span>
+      </div>
+      <div class="section-label">大衆心理のメカニズム</div>
+      <div class="psy">東京で前日高値（安値）をブレイクした＝少人数でも壁を突破した異常なエネルギー。「弱い時間帯でのブレイク＝強いトレンドの前兆」。欧州の新規参加者は「すでに動いている方向に乗るのが安全」と判断し、買い（売り）を追加。これが自己増殖型トレンドを生む。</div>
+      <div class="section-label">核テクニック：東京の仮説を欧州で検証</div>
+      <div class="row2">
+        <div class="mini"><div class="mini-label">検証①：方向一致</div><div class="mini-val">欧州が東京と同方向か<br>→ 一致で仮説継続</div></div>
+        <div class="mini"><div class="mini-label">検証②：値幅一致（最重要）</div><div class="mini-val">欧州値幅≒東京値幅<br>→ 大きく乖離なら仮説崩壊</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">意思決定アルゴリズム</div>
+      <div class="algo">
+        <div class="step-row"><div class="step-num">1</div><div><b>環境認識</b>：日足エリオット波動で方向固定（上昇 or 下落 or 見送り）</div></div>
+        <div class="step-row"><div class="step-num">2</div><div><b>東京判定（13〜14時）</b>：前日高値・安値をブレイクしているか？ ヒゲだけ触れた・ブレイク後戻ったはNG</div></div>
+        <div class="step-row"><div class="step-num">3</div><div><b>欧州（15時〜）</b>：方向一致 ＋ 値幅が同程度 → パターン成立</div></div>
+        <div class="step-row"><div class="step-num">4</div><div><b>エントリー選択</b>：①ブレイクアウト（15時ジャスト＋ストキャス＋MACD）or ②押し目買い（15分足ストキャスGCで即入り）</div></div>
+        <div class="step-row"><div class="step-num">5</div><div><b>損切り</b>：前日高値（安値）ブレイク方向の反対側</div></div>
+        <div class="step-row"><div class="step-num">6</div><div><b>利確</b>：NYまで保有 or 東京値幅相当で分割利確</div></div>
+      </div>
+      <hr>
+      <div class="warn">東京と欧州の値幅が大きく乖離（例：東京+30pips・欧州+48pips）→「東京はノイズだった可能性」として仮説破棄・ノートレード。東京の正しさは欧州が証明する。</div>
+    </div>
+  `
+},
+{
+  id:'p34', label:'③④ NY逆張り', color:'b-amber',
+  title:'パターン③④ ── NY決済フロー逆張り',
+  content: () => `
+    <div class="card">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:.8rem">
+        <span class="badge b-teal">東京：トレンド</span>
+        <span class="badge b-teal">欧州：同方向継続</span>
+        <span class="badge b-amber">NY：逆方向エントリー</span>
+        <span class="badge b-info">難易度：初級</span>
+      </div>
+      <div class="section-label">大衆心理のメカニズム</div>
+      <div class="psy">東京〜欧州で積み上がった買い（売り）ポジションは、NY開始とともに一斉に決済される。NYは「新しいトレンドを作る時間帯」ではなく「決済フローが支配する時間帯」。ポジションの偏りが解消されるときの逆方向の圧力に乗る戦略。</div>
+      <div class="row3">
+        <div class="mini"><div class="mini-label">東京↑ + 欧州↑</div><div class="mini-val">→ NY↓（売り）<br>買いポジション決済ラッシュ</div></div>
+        <div class="mini"><div class="mini-label">東京↓ + 欧州↓</div><div class="mini-val">→ NY↑（買い）<br>売りポジション決済ラッシュ</div></div>
+        <div class="mini"><div class="mini-label">方向が不一致</div><div class="mini-val">→ 見送り<br>優位性なし</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">意思決定アルゴリズム</div>
+      <div class="algo">
+        <div class="step-row"><div class="step-num">1</div><div><b>東京・欧州の方向確認</b>：両方同じ方向かチェック</div></div>
+        <div class="step-row"><div class="step-num">2</div><div><b>エリオット整合チェック</b>：NYの逆張り方向がエリオットと逆なら絶対見送り</div></div>
+        <div class="step-row"><div class="step-num">3</div><div><b>NYエントリー（21時〜）</b>：ストキャス80以上→売り / 20以下→買い</div></div>
+        <div class="step-row"><div class="step-num">4</div><div><b>利確</b>：直近高値（安値）</div></div>
+      </div>
+      <hr>
+      <div class="warn">エリオット上昇中にNY↓（逆張り）は危険。長期の流れが短期の決済フローを圧倒する。「エリオットと逆ならやらない」が絶対ルール。</div>
+    </div>
+  `
+},
+{
+  id:'p56', label:'⑤⑥ 欧州共通抜き', color:'b-amber',
+  title:'パターン⑤⑥ ── 欧州の2択共通部分を抜く',
+  content: () => `
+    <div class="card">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:.8rem">
+        <span class="badge b-teal">東京：トレンド</span>
+        <span class="badge b-amber">欧州：トレンド or レンジ（2択）</span>
+        <span class="badge b-gray">NY：利確 or 継続</span>
+        <span class="badge b-info">難易度：中級</span>
+      </div>
+      <div class="section-label">大衆心理・核テクニック</div>
+      <div class="psy">東京が上昇した後、欧州は「トレンド継続」か「レンジ」の2択しかない。「下落」は東京上昇後には消える。この2択に共通するのは「一度は上がる」という事実。当てに行かず、「上昇でもレンジでも勝てる場所」＝押し目から直近高値までを抜くだけ。</div>
+      <div class="row2">
+        <div class="mini"><div class="mini-label">トレンドの場合</div><div class="mini-val">押し目から伸びる<br>→ 直近高値を超えて利益</div></div>
+        <div class="mini"><div class="mini-label">レンジの場合</div><div class="mini-val">一度高値まで戻る<br>→ 直近高値で止まって利益</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">放置型3段階指値設計（実戦テンプレ）</div>
+      <div class="algo">
+        <div class="step-row"><div class="step-num">1</div><div><b>東京値幅Aを測定</b>：東京の高安差（目安15〜30pips）</div></div>
+        <div class="step-row"><div class="step-num">2</div><div><b>3段階で指値を置く</b>：①38.2%（少ロット）②50%（メインロット）③61.8%（追加ロット）</div></div>
+        <div class="step-row"><div class="step-num">3</div><div><b>利確</b>：直近高値（トレンドでもレンジでも有効な唯一の確実ゾーン）</div></div>
+        <div class="step-row"><div class="step-num">4</div><div><b>損切り</b>：直近安値の少し下（ここ割れ＝前提崩壊）</div></div>
+        <div class="step-row"><div class="step-num">5</div><div><b>フィルター</b>：直近高値まで20pips以上・明確な押し・欧州初動（15〜17時）限定</div></div>
+      </div>
+      <hr>
+      <div class="warn">「押しを待てずに高値掴み」「利確を欲張る」が最大の負けパターン。直近高値での機械的利確が前提。</div>
+    </div>
+  `
+},
+{
+  id:'p78', label:'⑦⑧ NYトレンド再開', color:'b-purple',
+  title:'パターン⑦⑧ ── 未消化エネルギーのNY放出（本命）',
+  content: () => `
+    <div class="card">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:.8rem">
+        <span class="badge b-teal">東京：トレンド</span>
+        <span class="badge b-purple">欧州：レンジ（消化不足）</span>
+        <span class="badge b-purple">NY：東京方向に再開</span>
+        <span class="badge b-info">難易度：中〜上級</span>
+      </div>
+      <div class="section-label">大衆心理のメカニズム</div>
+      <div class="psy">東京で方向が出たにもかかわらず欧州がレンジになった＝エネルギーが消化されずに蓄積されている状態。NY開始で「決済＋新規参入」が一気に発生し、途中で止まったトレンドの「続き」が実行される。⑤⑥と複合すれば1日2回取れる最強パターン。</div>
+      <div class="row2">
+        <div class="mini"><div class="mini-label">最強複合パターン</div><div class="mini-val">日足上昇 + 東京上昇<br>+ 欧州レンジ<br>→ 欧州⑤ + NY⑦の2段取り</div></div>
+        <div class="mini"><div class="mini-label">レンジの定義（厳密に）</div><div class="mini-val">高値更新なし かつ<br>安値更新なし<br>ヒゲ抜けはレンジ扱い不可</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">意思決定アルゴリズム</div>
+      <div class="algo">
+        <div class="step-row"><div class="step-num">1</div><div><b>東京方向確定</b>：ブレイク済みの方向がNY戦略の基準</div></div>
+        <div class="step-row"><div class="step-num">2</div><div><b>欧州チェック</b>：レンジか？ → YES→⑦⑧発動 / NO→他パターンへ</div></div>
+        <div class="step-row"><div class="step-num">3</div><div><b>エリオット整合</b>：NYの方向がエリオットと一致するか確認</div></div>
+        <div class="step-row"><div class="step-num">4</div><div><b>NYエントリー（21〜22時）</b>：上昇→レンジ下限で買い / 下落→レンジ上限で売り ＋ストキャス反転</div></div>
+        <div class="step-row"><div class="step-num">5</div><div><b>損切り</b>：レンジの逆方向ブレイク（＝シナリオ否定）</div></div>
+      </div>
+      <hr>
+      <div class="warn">迷ったらレンジ扱い → それでも迷ったらやらない。これだけで勝率が変わる。</div>
+    </div>
+  `
+},
+{
+  id:'p910', label:'⑨⑩ 東京レンジ→欧州放出', color:'b-info',
+  title:'パターン⑨⑩ ── 東京レンジ後の欧州ブレイク（選別型）',
+  content: () => `
+    <div class="card">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:.8rem">
+        <span class="badge b-gray">東京：完全レンジ</span>
+        <span class="badge b-info">欧州：エリオット方向にブレイク</span>
+        <span class="badge b-info">NY：継続判断</span>
+        <span class="badge b-red">難易度：上級（選別ゲー）</span>
+      </div>
+      <div class="section-label">大衆心理のメカニズム</div>
+      <div class="psy">東京がレンジ＝蓄積①完了。方向は東京の動きからは読めない。エリオット波動だけが唯一の方向決定者。「長期トレンドに欧州が乗る瞬間」を捉える。やらない判断が最重要。</div>
+      <div class="section-label">4つのエントリータイプ</div>
+      <div class="row2">
+        <div class="mini"><div class="mini-label">① ブレイク確認型（推奨）</div><div class="mini-val">前日高値ブレイク後<br>押し目待ち / 安全・初中級</div></div>
+        <div class="mini"><div class="mini-label">② 3波ロジック型</div><div class="mini-val">ストキャス切り上げ<br>+ MACD同方向 / 勝率高</div></div>
+        <div class="mini"><div class="mini-label">③ 15時ジャスト型</div><div class="mini-val">欧州初動を直接取る<br>爆発力あり / ダマシ多</div></div>
+        <div class="mini"><div class="mini-label">④ 押し待ち型（上級）</div><div class="mini-val">一度逆振れを待つ<br>最良RR / メンタル必要</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">意思決定アルゴリズム</div>
+      <div class="algo">
+        <div class="step-row"><div class="step-num">1</div><div><b>東京レンジ確認</b>：前日高値・安値ともに未ブレイク</div></div>
+        <div class="step-row"><div class="step-num">2</div><div><b>エリオット方向強制決定</b>：日足3波/5波 → 方向確定。不明→即除外</div></div>
+        <div class="step-row"><div class="step-num">3</div><div><b>「やる日か」フィルター</b>：日足ぐちゃぐちゃ・逆行強い・方向感なし → スキップ</div></div>
+        <div class="step-row"><div class="step-num">4</div><div><b>欧州（15時）でタイプ選択</b>：上記4タイプから状況に応じて選ぶ</div></div>
+      </div>
+      <hr>
+      <div class="warn">「方向不明なのに強引にエリオットを解釈」「エリオットと逆の方向にエントリー」が全負けパターン。分からなければやらない、分かればシンプルに乗る。</div>
+    </div>
+  `
+},
+{
+  id:'p1112', label:'⑪⑫ NYで利益拡張', color:'b-purple',
+  title:'パターン⑪⑫ ── 欧州トレンド継続確認後のNY追随',
+  content: () => `
+    <div class="card">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:.8rem">
+        <span class="badge b-gray">東京：レンジ</span>
+        <span class="badge b-teal">欧州：トレンド発生・継続中</span>
+        <span class="badge b-purple">NY：継続追随</span>
+        <span class="badge b-info">難易度：上級</span>
+      </div>
+      <div class="section-label">大衆心理のメカニズム</div>
+      <div class="psy">欧州勢が含み益を持ったままポジションを保持していると、NY勢は「流れが続く」と判断して参入する。「欧州勢が利確していないから伸びる」が核心。欧州で作られた値幅Aは、NYでほぼ同等に再現される（「欧州：仕掛け」→「NY：追随・同じ熱量で拡張」）。</div>
+      <div class="section-label">欧州値幅A → NY目標値への転用</div>
+      <div class="row2">
+        <div class="mini"><div class="mini-label">値幅Aの計測</div><div class="mini-val">欧州開始〜一旦の高値まで<br>この値幅がNY目標値</div></div>
+        <div class="mini"><div class="mini-label">NY目標値の計算</div><div class="mini-val">欧州起点 ± A<br>例：欧州+50pips→NYも+50pips</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">「継続確認」の判断フレーム</div>
+      <div class="row2">
+        <div class="mini"><div class="mini-label">乗る条件（継続）</div><div class="mini-val">トレンド崩れていない<br>高値（安値）更新継続<br>押しが浅い</div></div>
+        <div class="mini"><div class="mini-label">見送り条件（終了）</div><div class="mini-val">NY前に失速・横ばい<br>大きく戻される<br>高値更新が止まる</div></div>
+      </div>
+      <div class="section-label" style="margin-top:.8rem">利確スタイル（推奨：ハイブリッド）</div>
+      <div class="algo">欧州で<b>50%利確</b> → 残り<b>50%をNY値幅A</b>まで保有。安定（メンタル維持）＋爆発力（利益の天井）を両取り。</div>
+    </div>
+  `
+},
+{
+  id:'p1314', label:'⑬⑭ 最大エネルギー爆発', color:'b-red',
+  title:'パターン⑬⑭ ── 東京×欧州ダブルレンジ後のNY爆発',
+  content: () => `
+    <div class="card">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:.8rem">
+        <span class="badge b-gray">東京：レンジ（蓄積①）</span>
+        <span class="badge b-gray">欧州：レンジ（蓄積②）</span>
+        <span class="badge b-red">NY：急騰 or 急落</span>
+        <span class="badge b-purple">爆発力：最大級</span>
+      </div>
+      <div class="section-label">大衆心理のメカニズム</div>
+      <div class="psy">2セッション連続でレンジ＝参加したい人は増え続けているが価格は動いていない状態。全員に「その日の最安値（最高値）が確定している」という共通認識が生まれる。NY開始で「一斉エントリー → 価格急加速 → さらに追随者」の自己増殖ループが発動する。</div>
+      <div class="section-label">3つのエントリータイプ</div>
+      <div class="row3">
+        <div class="mini"><div class="mini-label">① 先仕込み型（上級）</div><div class="mini-val">欧州終盤のレンジ端<br>RR最強 / ダマシあり</div></div>
+        <div class="mini"><div class="mini-label">② NY初動型（推奨）</div><div class="mini-val">21〜22時に時間で入る<br>再現性高い・安定</div></div>
+        <div class="mini"><div class="mini-label">③ ブレイク確認型</div><div class="mini-val">レンジ抜け確認後<br>勝率高い・利幅小さめ</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">意思決定アルゴリズム</div>
+      <div class="algo">
+        <div class="step-row"><div class="step-num">1</div><div><b>東京レンジ確認</b>：前日高値・安値ともに未ブレイク</div></div>
+        <div class="step-row"><div class="step-num">2</div><div><b>欧州レンジ確認</b>：同様に継続 → ⑬⑭発動条件成立</div></div>
+        <div class="step-row"><div class="step-num">3</div><div><b>エリオット方向確定</b>：これで「1/2問題」→「確率優位」に変わる</div></div>
+        <div class="step-row"><div class="step-num">4</div><div><b>最強条件</b>：レンジが「綺麗」、高値・安値が明確、日足トレンドが強い → 迷いのない市場完成</div></div>
+      </div>
+      <hr>
+      <div style="font-size:12.5px;color:var(--color-text-secondary);line-height:1.7">本質：「世界中のトレーダーが同じ価格を"安い"と認識した瞬間」がこのパターンの正体。</div>
+    </div>
+  `
+},
+{
+  id:'p1516', label:'⑮⑯ 値幅往復', color:'b-amber',
+  title:'パターン⑮⑯ ── 東京値幅Aの往復構造（計算型）',
+  content: () => `
+    <div class="card">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:.8rem">
+        <span class="badge b-gray">東京：レンジ内ちょい動き（未ブレイク）</span>
+        <span class="badge b-amber">欧州：東京値幅A分を逆行（回収）</span>
+        <span class="badge b-teal">NY：A分を再実行</span>
+      </div>
+      <div class="section-label">核テクニック：値幅Aアンカー</div>
+      <div class="psy">「1日の中で同一値幅が往復する」という力学構造に乗る。欧州の下落の正体は「東京ロングの損切り誘発＋逆張りショートの新規参入」という流動性回収。これが終わるとNYは「上がるのではなく上げざるを得ない」状態になる。</div>
+      <div class="row3">
+        <div class="mini"><div class="mini-label">A ＝ 東京高安差</div><div class="mini-val">目安：15〜30pips<br>全ての基準値</div></div>
+        <div class="mini"><div class="mini-label">欧州の下げ目安</div><div class="mini-val">A分下げたら<br>回収完了サイン</div></div>
+        <div class="mini"><div class="mini-label">利確幅（TP）</div><div class="mini-val">基本：A<br>安全：A×0.7</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">意思決定アルゴリズム</div>
+      <div class="algo">
+        <div class="step-row"><div class="step-num">1</div><div><b>環境認識</b>：日足エリオット上昇 ＋ 前日高値未更新 → 候補</div></div>
+        <div class="step-row"><div class="step-num">2</div><div><b>東京値幅A確定</b>：9時〜の高安差を測る（15〜30pips帯が理想）</div></div>
+        <div class="step-row"><div class="step-num">3</div><div><b>東京の「質」判定</b>：上昇しているが伸び切らない → ちょい上げ確定</div></div>
+        <div class="step-row"><div class="step-num">4</div><div><b>欧州の回収確認</b>：欧州がA分下げたか？ 値幅一致が鍵</div></div>
+        <div class="step-row"><div class="step-num">5</div><div><b>エントリー</b>：早取り（欧州で反転クロス）or 安全型（NY初動上昇確認後）</div></div>
+      </div>
+      <hr>
+      <div class="warn">「値幅を無視する」「欧州が浅い押しで入る（回収不足）」「NYまで待ちすぎる（旨味消滅）」が3大NG。</div>
+    </div>
+  `
+},
+{
+  id:'daily', label:'★ 統合意思決定フロー', color:'b-amber',
+  title:'毎日使う統合意思決定フロー',
+  content: () => `
+    <div class="card">
+      <div class="section-label">フロー概要</div>
+      <div class="psy">毎日のルーティンをこの順序で機械的に実行する。エリオット方向の固定と通貨選別が「前提」、東京の状態分類が「分岐点」、欧州・NYの確認が「パターン確定」、エリオットとの最終整合チェックが「実行許可」。</div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">前提レイヤー（毎日最初に確認）</div>
+      <div class="row2">
+        <div class="mini">
+          <div class="mini-label">前提① エリオット波動で方向固定</div>
+          <div class="mini-val" style="line-height:1.8">
+            日足で上昇 → 買いのみ<br>
+            日足で下落 → 売りのみ<br>
+            <span style="color:var(--color-text-danger)">不明 → 見送り or 軽め</span>
+          </div>
+        </div>
+        <div class="mini">
+          <div class="mini-label">前提② 通貨ペア選定</div>
+          <div class="mini-val" style="line-height:1.8">
+            USD/JPY・GBP/USD・GBP/JPY<br>EUR/USD・EUR/JPY のみ<br>
+            <span style="color:var(--color-text-danger)">マイナー系は即除外</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">東京タイム分類（13〜14時確認）── 全パターンの分岐点</div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:.8rem">
+        <div class="mini" style="border:1px solid var(--color-border-info)">
+          <div class="mini-label" style="color:var(--color-text-info)">A：ブレイクあり（前日高値/安値を突破）</div>
+          <div class="mini-val">→ パターン①〜⑧系へ<br><span style="font-size:12px;font-weight:400;color:var(--color-text-secondary)">方向は東京が示す</span></div>
+        </div>
+        <div class="mini" style="border:1px solid var(--color-border-info)">
+          <div class="mini-label" style="color:var(--color-text-info)">B：完全レンジ（ブレイクなし）</div>
+          <div class="mini-val">→ パターン⑨〜⑭系へ<br><span style="font-size:12px;font-weight:400;color:var(--color-text-secondary)">方向はエリオットのみ</span></div>
+        </div>
+        <div class="mini" style="border:1px solid var(--color-border-info)">
+          <div class="mini-label" style="color:var(--color-text-info)">C：ちょい動き（レンジ内・未ブレイク）</div>
+          <div class="mini-val">→ パターン⑮⑯系へ<br><span style="font-size:12px;font-weight:400;color:var(--color-text-secondary)">値幅A往復構造</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">A：東京ブレイクあり → 欧州・NYの分岐</div>
+      <div class="algo" style="margin-bottom:.8rem">
+        <div class="step-row"><div class="step-num" style="background:var(--color-background-success);color:var(--color-text-success)">欧</div><div><b>欧州が同方向継続</b>かつ値幅が東京と同程度 → <b>①②</b>（欧州で順張り・15時ジャスト or 押し目）</div></div>
+        <div class="step-row"><div class="step-num" style="background:var(--color-background-success);color:var(--color-text-success)">欧</div><div><b>欧州がレンジ</b>（未消化） → <b>⑤⑥</b>（押し目3段階指値）＋ <b>⑦⑧</b>（NY初動で再加速）を両狙い</div></div>
+        <div class="step-row"><div class="step-num" style="background:var(--color-background-success);color:var(--color-text-success)">欧</div><div><b>欧州が逆方向</b> → 見送り（値幅乖離が大きければ仮説崩壊・ノートレード）</div></div>
+        <div class="step-row"><div class="step-num" style="background:var(--color-background-warning);color:var(--color-text-warning)">NY</div><div><b>東京↑欧州↑ → NY逆張り</b>（決済フロー）→ <b>③④</b>　※エリオット逆なら絶対やらない</div></div>
+        <div class="step-row"><div class="step-num" style="background:var(--color-background-warning);color:var(--color-text-warning)">NY</div><div><b>欧州レンジ後</b> → NY初動で東京方向に再開 → <b>⑦⑧</b>（レンジ端＋ストキャス反転）</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">B：東京完全レンジ → 欧州・NYの分岐</div>
+      <div class="algo" style="margin-bottom:.8rem">
+        <div class="step-row"><div class="step-num" style="background:var(--color-background-success);color:var(--color-text-success)">欧</div><div><b>欧州でブレイク発生</b>（エリオット方向一致） → <b>⑨⑩</b>（4タイプから選択）</div></div>
+        <div class="step-row"><div class="step-num" style="background:var(--color-background-success);color:var(--color-text-success)">欧</div><div><b>欧州ブレイク継続中</b>（高値更新・押し浅い） → <b>⑪⑫</b>（NYで欧州値幅Aを再現）</div></div>
+        <div class="step-row"><div class="step-num" style="background:var(--color-background-warning);color:var(--color-text-warning)">NY</div><div><b>東京・欧州ともにレンジ継続</b> → <b>⑬⑭</b>（最大蓄積・NY爆発を待つ）</div></div>
+        <div class="step-row"><div class="step-num" style="background:var(--color-background-danger);color:var(--color-text-danger)">除</div><div>エリオット方向不明 → 即除外。「分からなければやらない」が唯一のルール</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">C：東京ちょい動き → ⑮⑯（値幅往復）</div>
+      <div class="algo" style="margin-bottom:.8rem">
+        <div class="step-row"><div class="step-num">1</div><div><b>東京値幅A測定</b>（9時〜の高安差・目安15〜30pips）</div></div>
+        <div class="step-row"><div class="step-num">2</div><div><b>欧州がA分逆行（回収完了）</b>を待つ → 反転シグナルでエントリー</div></div>
+        <div class="step-row"><div class="step-num">3</div><div><b>利確 TP＝A</b>（往復構造のため止まりやすい）</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">最終チェック：エリオット整合（全パターン共通・実行許可）</div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+        <div class="mini" style="border-left:3px solid var(--color-border-info)">
+          <div class="mini-label">一致</div>
+          <div class="mini-val" style="color:var(--color-text-success)">フルロット<br>本命エントリー</div>
+        </div>
+        <div class="mini" style="border-left:3px solid #888">
+          <div class="mini-label">不明（波動が読めない）</div>
+          <div class="mini-val" style="color:var(--color-text-secondary)">軽め or スルー<br>時間帯単体で対応</div>
+        </div>
+        <div class="mini" style="border-left:3px solid var(--color-border-danger)">
+          <div class="mini-label">逆方向</div>
+          <div class="mini-val" style="color:var(--color-text-danger)">絶対見送り<br>長期勢に潰される</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">パターン早引き対応表</div>
+      <table style="width:100%;font-size:12.5px;border-collapse:collapse">
+        <thead>
+          <tr style="border-bottom:0.5px solid var(--color-border-secondary)">
+            <th style="text-align:left;padding:6px 8px;font-weight:500;color:var(--color-text-secondary)">東京</th>
+            <th style="text-align:left;padding:6px 8px;font-weight:500;color:var(--color-text-secondary)">欧州</th>
+            <th style="text-align:left;padding:6px 8px;font-weight:500;color:var(--color-text-secondary)">NY</th>
+            <th style="text-align:left;padding:6px 8px;font-weight:500;color:var(--color-text-secondary)">パターン</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:0.5px solid var(--color-border-tertiary)">
+            <td style="padding:6px 8px">トレンド</td><td style="padding:6px 8px">同方向継続</td><td style="padding:6px 8px">保有・利確</td>
+            <td style="padding:6px 8px"><span class="badge b-teal">①②</span></td>
+          </tr>
+          <tr style="border-bottom:0.5px solid var(--color-border-tertiary)">
+            <td style="padding:6px 8px">トレンド</td><td style="padding:6px 8px">同方向継続</td><td style="padding:6px 8px">逆張り（決済フロー）</td>
+            <td style="padding:6px 8px"><span class="badge b-amber">③④</span></td>
+          </tr>
+          <tr style="border-bottom:0.5px solid var(--color-border-tertiary)">
+            <td style="padding:6px 8px">トレンド</td><td style="padding:6px 8px">トレンド or レンジ</td><td style="padding:6px 8px">共通部分取り</td>
+            <td style="padding:6px 8px"><span class="badge b-amber">⑤⑥</span></td>
+          </tr>
+          <tr style="border-bottom:0.5px solid var(--color-border-tertiary)">
+            <td style="padding:6px 8px">トレンド</td><td style="padding:6px 8px">レンジ（未消化）</td><td style="padding:6px 8px">東京方向に再開</td>
+            <td style="padding:6px 8px"><span class="badge b-purple">⑦⑧</span></td>
+          </tr>
+          <tr style="border-bottom:0.5px solid var(--color-border-tertiary)">
+            <td style="padding:6px 8px">レンジ</td><td style="padding:6px 8px">エリオット方向にブレイク</td><td style="padding:6px 8px">継続判断</td>
+            <td style="padding:6px 8px"><span class="badge b-info">⑨⑩</span></td>
+          </tr>
+          <tr style="border-bottom:0.5px solid var(--color-border-tertiary)">
+            <td style="padding:6px 8px">レンジ</td><td style="padding:6px 8px">ブレイク継続中</td><td style="padding:6px 8px">欧州値幅Aを追随</td>
+            <td style="padding:6px 8px"><span class="badge b-purple">⑪⑫</span></td>
+          </tr>
+          <tr style="border-bottom:0.5px solid var(--color-border-tertiary)">
+            <td style="padding:6px 8px">レンジ</td><td style="padding:6px 8px">レンジ継続</td><td style="padding:6px 8px">急騰 or 急落</td>
+            <td style="padding:6px 8px"><span class="badge b-red">⑬⑭</span></td>
+          </tr>
+          <tr style="border-bottom:0.5px solid var(--color-border-tertiary)">
+            <td style="padding:6px 8px">ちょい動き（未ブレイク）</td><td style="padding:6px 8px">A分逆行（回収）</td><td style="padding:6px 8px">A分再実行</td>
+            <td style="padding:6px 8px"><span class="badge b-amber">⑮⑯</span></td>
+          </tr>
+          <tr>
+            <td style="padding:6px 8px">ドル円・30pips超</td><td style="padding:6px 8px">—</td><td style="padding:6px 8px">—（12時終了）</td>
+            <td style="padding:6px 8px"><span class="badge b-gray">東京特化</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="section-label">絶対に守る鉄則</div>
+      <div class="row3">
+        <div class="warn" style="padding:.7rem;border-radius:var(--border-radius-md);border:none;border-left:2px solid var(--color-border-danger)">エリオットと逆はやらない。長期の流れは必ず短期を潰す</div>
+        <div class="warn" style="padding:.7rem;border-radius:var(--border-radius-md);border:none;border-left:2px solid var(--color-border-danger)">迷ったらレンジ扱い。それでも迷ったらやらない</div>
+        <div class="warn" style="padding:.7rem;border-radius:var(--border-radius-md);border:none;border-left:2px solid var(--color-border-danger)">マイナー通貨はやらない。流動性なければパターン不成立</div>
+      </div>
+    </div>
+  `
+},
+{
+  id:'tokyo', label:'ドル円東京特化', color:'b-gray',
+  title:'ドル円限定・東京タイム特化トレード',
+  content: () => `
+    <div class="card">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:.8rem">
+        <span class="badge b-gray">通貨：ドル円限定</span>
+        <span class="badge b-gray">時間：9〜12時のみ</span>
+        <span class="badge b-amber">手法：フロー追従型</span>
+        <span class="badge b-info">難易度：入門（最シンプル）</span>
+      </div>
+      <div class="section-label">本質：予測ではなく事実への追従</div>
+      <div class="psy">9〜10時の株式市場オープンで企業・機関の実需・大口資金移動が集中し「理由のあるトレンド」が発生する。これはトレンド分析でもパターン分析でもなく、「異常な資金流入という事実が確認された後に追従する」フロー追従型。昼休みの12時で流動性が低下するため時間制限付きトレンド。</div>
+      <div class="row3">
+        <div class="mini"><div class="mini-label">発動条件</div><div class="mini-val">9〜10時の値幅<br>30pips以上</div></div>
+        <div class="mini"><div class="mini-label">エントリー</div><div class="mini-val">10時ジャスト<br>（基本型・再現性最高）</div></div>
+        <div class="mini"><div class="mini-label">利確 / 損切り</div><div class="mini-val">5〜10pips即利確<br>12時強制決済</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">意思決定アルゴリズム（6ステップ）</div>
+      <div class="algo">
+        <div class="step-row"><div class="step-num">1</div><div><b>10時にチャートを見る</b></div></div>
+        <div class="step-row"><div class="step-num">2</div><div><b>9〜10時の値幅を測る</b>（ヒゲ含む）</div></div>
+        <div class="step-row"><div class="step-num">3</div><div><b>30pips以上なら方向決定</b>：上昇→買い / 下落→売り（完全順張り・逆張り禁止）</div></div>
+        <div class="step-row"><div class="step-num">4</div><div><b>即エントリー</b>：10時ジャスト or 10〜10:30の押し目</div></div>
+        <div class="step-row"><div class="step-num">5</div><div><b>5〜10pipsで即利確</b>（欲張らない・スキャル設計）</div></div>
+        <div class="step-row"><div class="step-num">6</div><div><b>12時で強制決済</b>（絶対ルール）</div></div>
+      </div>
+      <hr>
+      <div class="warn">30pips未満はただのノイズ。11時以降は終盤参加で不利。他時間帯と混ぜるとロジック崩壊。この手法は東京の中だけで完結する独立型。</div>
+    </div>
+  `
+}
+];
+
+function render(id) {
+  const g = groups.find(x => x.id === id);
+  document.getElementById('content').innerHTML =
+    `<div><div style="font-size:16px;font-weight:500;margin-bottom:1rem">${g.title}</div>${g.content()}</div>`;
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-id="${id}"]`).classList.add('active');
+}
+
+const nav = document.getElementById('nav');
+groups.forEach(g => {
+  const btn = document.createElement('button');
+  btn.className = 'nav-btn';
+  btn.dataset.id = g.id;
+  btn.textContent = g.label;
+  btn.onclick = () => render(g.id);
+  nav.appendChild(btn);
+});
+render('daily');
+</script>
+</body>
+</html>
