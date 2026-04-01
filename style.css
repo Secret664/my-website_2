@@ -104,26 +104,31 @@ h1, h2 {
    集計エリア
 ========================= */
 .summary {
-  background: #0f172a;
-  color: #fff;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
 }
 
 .summary h2 {
-  border-color: #ccc;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 5px;
+  margin-bottom: 15px;
 }
 
 .summary-box {
   display: flex;
   gap: 15px;
   flex-wrap: wrap;
-  font-size: 16px;
 }
 
 .summary-box p {
-  background: #ffffff;
-  padding: 10px 15px;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  flex: 1;
+  min-width: 120px;
+  text-align: center;
+  padding: 15px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  font-size: 18px;
+  font-weight: bold;
 }
 
 /* =========================
