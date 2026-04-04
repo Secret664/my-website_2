@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>鉄板チャートパターン｜トレード理論</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600;700&family=JetBrains+Mono:wght@300;400;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080e1a;
+    --bg2: #0d1525;
+    --bg3: #111d30;
+    --surface: #131f33;
+    --surface2: #1a2840;
+    --border: rgba(255,255,255,0.07);
+    --gold: #c9a84c;
+    --gold2: #e8c97a;
+    --gold-dim: rgba(201,168,76,0.15);
+    --cyan: #3dd9d9;
+    --cyan-dim: rgba(61,217,217,0.12);
+    --red: #e05555;
+    --red-dim: rgba(224,85,85,0.12);
+    --green: #4ec9a0;
+    --green-dim: rgba(78,201,160,0.12);
+    --yellow: #f0c040;
+    --text: #d8e4f5;
+    --text-dim: rgba(216,228,245,0.55);
+    --text-muted: rgba(216,228,245,0.3);
+    --p1: #3dd9d9;
+    --p2: #e8c97a;
+    --p3: #9b7fe8;
+    --p4: #f08a5a;
+    --p5: #e05593;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 300;
+    line-height: 1.8;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(8,14,26,0.9);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 52px;
+    display: flex;
+    align-items: center;
+  }
+  nav .logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    font-weight: 600;
+    margin-right: auto;
+  }
+  nav a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    padding: 0 0.9rem;
+    transition: color 0.2s;
+  }
+  nav a:hover { color: var(--gold2); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: 6rem 2rem 4rem;
+    text-align: center;
+    overflow: hidden;
+  }
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 20%, transparent 100%);
+  }
+  .hero-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .hero-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+  .hero h1 {
+    font-size: clamp(2.6rem, 6.5vw, 4.8rem);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.35s forwards;
+  }
+  .hero h1 span {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 60%, #fff8e0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-sub {
+    font-size: 0.95rem;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.5s forwards;
+  }
+  .hero-quote {
+    max-width: 580px;
+    padding: 1.5rem 2rem;
+    border: 1px solid rgba(201,168,76,0.25);
+    border-left: 3px solid var(--gold);
+    background: rgba(201,168,76,0.04);
+    text-align: left;
+    font-size: 0.95rem;
+    line-height: 1.9;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.65s forwards;
+  }
+  .hero-quote strong { color: var(--gold2); font-weight: 600; }
+  .hero-scroll {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    animation: fadeUp 1s 1.2s both;
+  }
+  .hero-scroll::after {
+    content: '';
+    width: 1px;
+    height: 36px;
+    background: linear-gradient(var(--gold), transparent);
+    animation: scrollLine 1.6s ease-in-out infinite;
+  }
+  @keyframes scrollLine {
+    0%,100% { opacity: 0.3; transform: scaleY(0.8); }
+    50% { opacity: 1; transform: scaleY(1); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* LAYOUT */
+  .section {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 4.5rem 2rem;
+  }
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border) 30%, var(--border) 70%, transparent);
+  }
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.28em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(201,168,76,0.3), transparent);
+  }
+  .section h2 {
+    font-size: clamp(1.4rem, 2.8vw, 1.9rem);
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 2rem;
+  }
+  p { line-height: 1.9; margin-bottom: 1rem; }
+  p:last-child { margin-bottom: 0; }
+  strong { font-weight: 600; color: var(--text); }
+
+  /* THEME BOX */
+  .theme-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--gold);
+    padding: 2rem 2.5rem;
+    margin-bottom: 2rem;
+  }
+  .theme-box h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--gold2);
+    margin-bottom: 0.8rem;
+  }
+
+  /* FLOW CHAIN */
+  .flow-chain {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 1.8rem 2rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 2.1;
+    color: var(--cyan);
+  }
+  .flow-chain .arrow {
+    display: block;
+    color: var(--text-muted);
+    text-align: center;
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+  .flow-chain .step { display: block; text-align: center; color: var(--text); }
+  .flow-chain .step.accent { color: var(--gold2); font-weight: 600; }
+  .flow-chain .step.danger { color: var(--red); }
+
+  /* TABLES */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    margin: 1.5rem 0;
+  }
+  .data-table th {
+    background: var(--surface2);
+    padding: 0.7rem 1rem;
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    font-weight: 400;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+  }
+  .data-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+
+  /* ALGO */
+  .algo-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 2rem 0;
+  }
+  .algo-step {
+    width: 100%;
+    max-width: 520px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    padding: 1rem 1.5rem;
+    display: flex;
+    gap: 1.2rem;
+    align-items: flex-start;
+  }
+  .algo-step .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--gold);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    margin-top: 0.2rem;
+  }
+  .algo-step .content { flex: 1; }
+  .algo-step .content strong { color: var(--text); font-weight: 600; }
+  .algo-step .content small {
+    display: block;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    margin-top: 0.2rem;
+  }
+  .algo-arrow {
+    width: 1px;
+    height: 18px;
+    background: linear-gradient(var(--gold), rgba(201,168,76,0.2));
+    margin: 0 auto;
+  }
+
+  /* PATTERN HEADER */
+  .pattern-header {
+    background: var(--surface2);
+    border-top: 2px solid;
+    padding: 3rem 2rem 2rem;
+    position: relative;
+    overflow: hidden;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  .pattern-header .big-num {
+    position: absolute;
+    right: -1rem; top: -1.5rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 10rem;
+    font-weight: 700;
+    font-style: italic;
+    opacity: 0.04;
+    line-height: 1;
+    pointer-events: none;
+  }
+  .pattern-header h2 {
+    font-size: 1.55rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+  .pattern-header .tagline {
+    font-style: italic;
+    color: var(--text-dim);
+    font-size: 0.88rem;
+    margin-bottom: 0.8rem;
+  }
+  .tag-pill {
+    display: inline-flex;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.63rem;
+    letter-spacing: 0.08em;
+    padding: 0.25rem 0.75rem;
+    border: 1px solid;
+    margin-right: 0.4rem;
+    margin-top: 0.4rem;
+  }
+
+  /* GRIDS */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  .info-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 1.2rem 1.4rem;
+    font-size: 0.87rem;
+    line-height: 1.8;
+  }
+  .info-box h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    margin-bottom: 0.8rem;
+    font-weight: 400;
+  }
+  .info-box ul { list-style: none; }
+  .info-box ul li::before {
+    content: '→ ';
+    font-family: 'JetBrains Mono', monospace;
+    opacity: 0.45;
+  }
+
+  /* QUOTE */
+  .quote-block {
+    border-left: 3px solid var(--gold);
+    padding: 1rem 1.5rem;
+    background: var(--gold-dim);
+    font-style: italic;
+    font-size: 0.97rem;
+    color: var(--gold2);
+    margin: 1.5rem 0;
+    line-height: 1.9;
+  }
+
+  /* PLAYER TABLE */
+  .player-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 1rem 0; }
+  .player-table th {
+    background: var(--surface2);
+    padding: 0.65rem 1rem;
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    font-weight: 400;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+  }
+  .player-table td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+  .player-table tr:last-child td { border-bottom: none; }
+  .player-table .pro td { background: rgba(201,168,76,0.04); }
+
+  /* STRUCT BOX */
+  .struct-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 2.2;
+    color: var(--text-dim);
+  }
+  .struct-box .hl { color: var(--cyan); }
+  .struct-box .hl2 { color: var(--gold2); }
+  .struct-box .hl3 { color: var(--green); }
+  .struct-box .hl4 { color: var(--red); }
+  .struct-box .comment { color: var(--text-muted); }
+
+  /* DO/DONT */
+  .do-dont {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  @media (max-width: 620px) { .do-dont { grid-template-columns: 1fr; } }
+  .do-box, .dont-box {
+    padding: 1.2rem 1.4rem;
+    font-size: 0.85rem;
+    line-height: 1.8;
+  }
+  .do-box {
+    background: var(--green-dim);
+    border: 1px solid rgba(78,201,160,0.25);
+  }
+  .dont-box {
+    background: var(--red-dim);
+    border: 1px solid rgba(224,85,85,0.25);
+  }
+  .do-box h4 { color: var(--green); margin-bottom: 0.6rem; font-size: 0.7rem; letter-spacing: 0.1em; font-family: 'JetBrains Mono', monospace; }
+  .dont-box h4 { color: var(--red); margin-bottom: 0.6rem; font-size: 0.7rem; letter-spacing: 0.1em; font-family: 'JetBrains Mono', monospace; }
+  .do-box ul, .dont-box ul { list-style: none; }
+  .do-box ul li::before { content: '✓ '; color: var(--green); font-family: monospace; }
+  .dont-box ul li::before { content: '✕ '; color: var(--red); font-family: monospace; }
+
+  /* FUEL */
+  .fuel-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .fuel-table th {
+    background: var(--surface2);
+    padding: 0.6rem 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.63rem;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    text-align: left;
+    font-weight: 400;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+  }
+  .fuel-table td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .fuel-table tr:last-child td { border-bottom: none; }
+  .fuel-bar-wrap { display: flex; align-items: center; gap: 0.8rem; }
+  .fuel-bar { height: 6px; border-radius: 3px; min-width: 20px; }
+  .fuel-label { font-size: 0.72rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
+
+  /* MSG CARDS */
+  .msg-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  @media (max-width: 700px) { .msg-cards { grid-template-columns: 1fr; } }
+  .msg-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 2rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .msg-card::before {
+    content: attr(data-n);
+    position: absolute;
+    top: -0.5rem; right: 0.5rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 5.5rem;
+    font-weight: 700;
+    font-style: italic;
+    opacity: 0.04;
+    line-height: 1;
+    color: var(--gold);
+  }
+  .msg-card h3 {
+    font-size: 0.93rem;
+    font-weight: 700;
+    color: var(--gold2);
+    margin-bottom: 0.8rem;
+    line-height: 1.5;
+  }
+  .msg-card p { font-size: 0.83rem; color: var(--text-dim); line-height: 1.8; }
+
+  /* RULES */
+  .rules-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  @media (max-width: 640px) { .rules-grid { grid-template-columns: 1fr; } }
+  .rule-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+  }
+  .rule-item .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.63rem;
+    letter-spacing: 0.12em;
+    color: var(--gold);
+    margin-bottom: 0.6rem;
+  }
+  .rule-item .value { font-size: 0.88rem; line-height: 1.8; }
+
+  /* COLORS */
+  .p1 { color: var(--p1); }
+  .p2 { color: var(--p2); }
+  .p3 { color: var(--p3); }
+  .p4 { color: var(--p4); }
+  .p5 { color: var(--p5); }
+
+  /* FADE */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.65s ease, transform 0.65s ease;
+  }
+  .fade-in.visible { opacity: 1; transform: none; }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 2.5rem 2rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 640px) {
+    nav a { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="logo">TETSUBAN // CHART THEORY</span>
+  <a href="#overview">概要</a>
+  <a href="#algo">アルゴ</a>
+  <a href="#patterns">パターン</a>
+  <a href="#conclusion">まとめ</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-tag">Trade Theory — 鉄板チャートパターン</div>
+  <h1><span>鉄板チャートパターン</span></h1>
+  <div class="hero-sub">必ずテクニカルが入る — 5つの鉄板形を習得せよ</div>
+  <div class="hero-quote">
+    <strong>「相場を動かしている正体（＝大衆の決済行動）を理解し、<br>その発動ポイントだけを狙うトレード」</strong>
+  </div>
+  <div class="hero-scroll">SCROLL</div>
+</section>
+
+<!-- OVERVIEW -->
+<div class="divider"></div>
+<section class="section" id="overview">
+  <div class="section-label">Section 01 — 全体テーマ</div>
+  <h2>どこで戦わないかを決めるトレード</h2>
+
+  <div class="theme-box fade-in">
+    <h3>🎯 本質思想</h3>
+    <p>勝つためのエントリーを探すのではなく、<strong>やらない場所を先に決める</strong>ことが本質。分からない相場は捨てる。確定した形が出た瞬間だけ乗る。</p>
+  </div>
+
+  <div class="fade-in" style="margin-bottom:2rem;">
+    <div class="section-label" style="margin-bottom:1rem;">Nパターンの基本構造</div>
+    <p>上昇 → 押し → 再上昇という波形で、完成時点では「多くの買いポジション＋含み益」が大量に積み上がっている状態。つまり<strong>「利確予備軍が溜まっている地雷原」</strong>。</p>
+  </div>
+
+  <div class="fade-in" style="margin-bottom:2rem;">
+    <div class="section-label" style="margin-bottom:1rem;">N後の急落の正体（最重要）</div>
+    <table class="data-table" style="margin-bottom:1.5rem;">
+      <thead><tr><th>よくある誤解</th><th>正解</th></tr></thead>
+      <tbody>
+        <tr><td>❌ 新規の売りが入った</td><td><strong>利確売りの連鎖</strong></td></tr>
+        <tr><td>❌ 押し目チャンス</td><td><strong>燃料切れの場所</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="flow-chain">
+      <span class="step">含み益がある</span>
+      <span class="arrow">↓</span>
+      <span class="step">利益が減り始める</span>
+      <span class="arrow">↓</span>
+      <span class="step">利確したくなる</span>
+      <span class="arrow">↓</span>
+      <span class="step accent">売りが連鎖</span>
+      <span class="arrow">↓</span>
+      <span class="step danger">買いが消える（需給消滅）</span>
+      <span class="arrow">↓</span>
+      <span class="step danger">下落加速</span>
+    </div>
+  </div>
+
+  <div class="fade-in" style="margin-bottom:2rem;">
+    <div class="section-label" style="margin-bottom:1rem;">半分戻し（50%）ルール</div>
+    <p style="margin-bottom:1rem;">N完成後の急落で<strong>「3波の半分まで戻したか」</strong>が唯一の判断基準。</p>
+    <table class="data-table">
+      <thead><tr><th>戻し幅</th><th>状態</th><th>行動</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>浅い（1/3以内）</td>
+          <td>強気継続</td>
+          <td><span style="color:var(--green);font-family:monospace;font-size:0.8rem;">✓ 押し目狙いOK</span></td>
+        </tr>
+        <tr>
+          <td>中間（1/3〜1/2）</td>
+          <td>曖昧ゾーン</td>
+          <td><span style="color:var(--yellow);font-family:monospace;font-size:0.8rem;">上昇確認後に慎重に</span></td>
+        </tr>
+        <tr>
+          <td>半分以上</td>
+          <td><span style="color:var(--red)">相場終了</span></td>
+          <td><span style="color:var(--red);font-family:monospace;font-size:0.8rem;">✕ 完全スルー</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="quote-block">
+      人間心理として、利益が半分削られると「もういいや」と感じる人が急増する。
+      だから売り圧が一気に増加し、半分が基準になる。
+    </div>
+  </div>
+
+  <div class="grid-2 fade-in">
+    <div class="info-box" style="border-left:3px solid var(--red);">
+      <h4 style="color:var(--red)">❌ 負けパターン（形だけ見ている）</h4>
+      <ul>
+        <li>「押し目だ！」→ 買う</li>
+        <li>「3波継続だ！」→ 買う</li>
+        <li>「5波行くはず！」→ 買う</li>
+        <li>解釈を変えてエントリー</li>
+      </ul>
+    </div>
+    <div class="info-box" style="border-left:3px solid var(--green);">
+      <h4 style="color:var(--green)">✅ 勝つ人の思考</h4>
+      <ul>
+        <li>「誰の注文か？」を見る</li>
+        <li>解釈は自由、行動は固定</li>
+        <li>分からない相場は "捨てる"</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ALGO -->
+<div class="divider"></div>
+<section class="section" id="algo">
+  <div class="section-label">Section 02 — 実戦アルゴリズム</div>
+  <h2>完全版エントリーフロー</h2>
+  <p class="fade-in">以下のSTEPを順番に踏まない限り、エントリーしない。これがフィルタリングの全て。</p>
+
+  <div class="algo-wrapper fade-in" style="margin-top:2rem;">
+    <div class="algo-step">
+      <span class="num">STEP①</span>
+      <div class="content">
+        <strong>日足で方向確認</strong>
+        <small>上昇トレンドが継続しているか？</small>
+      </div>
+    </div>
+    <div class="algo-arrow"></div>
+    <div class="algo-step">
+      <span class="num">STEP②</span>
+      <div class="content">
+        <strong>1時間足で前日高値・安値チェック</strong>
+        <small>ブレイクしていなければ見送り</small>
+      </div>
+    </div>
+    <div class="algo-arrow"></div>
+    <div class="algo-step">
+      <span class="num">STEP③</span>
+      <div class="content">
+        <strong>Nパターン形成確認</strong>
+        <small>綺麗なNか？崩れていれば見送り</small>
+      </div>
+    </div>
+    <div class="algo-arrow"></div>
+    <div class="algo-step">
+      <span class="num">STEP④</span>
+      <div class="content">
+        <strong>急落チェック</strong>
+        <small>ストンと落ちたか？</small>
+      </div>
+    </div>
+    <div class="algo-arrow"></div>
+    <div class="algo-step">
+      <span class="num">STEP⑤</span>
+      <div class="content">
+        <strong>戻し幅確認</strong>
+        <small>50%到達 → 完全スルー　/ 浅い押し → 続行</small>
+      </div>
+    </div>
+    <div class="algo-arrow"></div>
+    <div class="algo-step">
+      <span class="num">STEP⑥</span>
+      <div class="content">
+        <strong>鉄板パターン確認</strong>
+        <small>ストキャスなどでタイミング計測</small>
+      </div>
+    </div>
+    <div class="algo-arrow"></div>
+    <div class="algo-step" style="border-left-color:var(--gold);background:rgba(201,168,76,0.06);">
+      <span class="num" style="color:var(--gold2)">STEP⑦</span>
+      <div class="content">
+        <strong style="color:var(--gold2)">エントリー（5波狙い）</strong>
+        <small>全条件クリア後のみ実行</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PATTERNS HEADER -->
+<div class="divider"></div>
+<div id="patterns"></div>
+
+<!-- PATTERN 1 -->
+<section style="background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:0;">
+  <div class="pattern-header" style="border-top-color:var(--p1);">
+    <div class="big-num" style="color:var(--p1);">1</div>
+    <div class="section-label" style="margin-bottom:0.8rem;">Pattern 01</div>
+    <h2 class="p1">パターン① — サポレジラインで反発</h2>
+    <div class="tagline">燃料：新規買い＋売りの損切り（最強パターン）</div>
+    <span class="tag-pill p1" style="border-color:var(--p1);">5波の値動き</span>
+    <span class="tag-pill" style="color:var(--text-dim);border-color:var(--border);">トレンド継続</span>
+    <span class="tag-pill" style="color:var(--text-dim);border-color:var(--border);">最強パターン</span>
+  </div>
+</section>
+
+<section class="section" style="padding-top:3rem;">
+  <div class="fade-in">
+    <div class="section-label" style="margin-bottom:1rem;">構造の全体像</div>
+    <div class="struct-box">
+      <span class="hl">①</span> 1〜3波上昇<br>
+      <span class="hl">②</span> 浅い押し（1/3）→ <span class="hl2">3波と固定（例外なし）</span><br>
+      <span class="hl">③</span> 高値更新ブレイク<br>
+      <span class="hl">④</span> 押し<br>
+      <span class="hl">⑤</span> サポレジ到達 → <span class="hl3">← ここが戦場</span>
+    </div>
+  </div>
+
+  <div class="fade-in" style="margin-top:2rem;">
+    <div class="section-label" style="margin-bottom:1rem;">サポレジラインで起きていること（本質）</div>
+    <div class="flow-chain">
+      <span class="step">売り勢 →「抜けた！下だ！」→ ショートエントリー 💣</span>
+      <span class="arrow">↓</span>
+      <span class="step accent">しかし割れない（ここが本質）</span>
+      <span class="arrow">↓</span>
+      <span class="step">売り勢 → 含み損 → 損切りスタンバイ</span>
+      <span class="arrow">↓</span>
+      <span class="step">買い勢 →「やっぱり強い」→ エントリー 🚀</span>
+      <span class="arrow">↓</span>
+      <span class="step accent">買い注文 ＋ 売りの損切りが同時発動</span>
+      <span class="arrow">↓</span>
+      <span class="step" style="color:var(--cyan);">爆発的な上昇（＝5波）</span>
+    </div>
+    <div class="quote-block">
+      「間違った売りを燃料にして上がる構造の、点火の瞬間だけに乗るトレード」
+    </div>
+    <table class="data-table fade-in">
+      <thead><tr><th>❌ 勘違い</th><th>✅ 正解</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>「サポートだから上がる」</td>
+          <td>「サポートを使って<strong>"売りを殺してから"</strong>上がる」</td>
+        </tr>
+        <tr>
+          <td>「5波を当てる手法」</td>
+          <td>「5波になりやすい条件だけ狙う手法」</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- PATTERN 2 -->
+<div class="divider"></div>
+<section style="background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:0;">
+  <div class="pattern-header" style="border-top-color:var(--p2);">
+    <div class="big-num" style="color:var(--p2);">2</div>
+    <div class="section-label" style="margin-bottom:0.8rem;">Pattern 02</div>
+    <h2 class="p2">パターン② — レジサポが機能しなかった場合</h2>
+    <div class="tagline">燃料：乗り遅れの新規買い（最終局面・勝ち逃げポイント）</div>
+    <span class="tag-pill p2" style="border-color:var(--p2);">最終局面</span>
+    <span class="tag-pill" style="color:var(--text-dim);border-color:var(--border);">伸びに期待しない</span>
+  </div>
+</section>
+
+<section class="section" style="padding-top:3rem;">
+  <div class="fade-in">
+    <div class="section-label" style="margin-bottom:1rem;">①との関係・分岐点</div>
+    <div class="struct-box">
+      上昇 → 押し → 上昇 → 押し <span class="comment">← ここまで①と完全同一</span><br>
+      <span class="comment">↓ここで分岐</span><br>
+      サポレジが効く  →  <span class="hl">パターン①（トレンド継続）</span><br>
+      サポートで止まる →  <span class="hl2">パターン②（5波・最終局面）</span>
+    </div>
+  </div>
+
+  <div class="fade-in" style="margin-top:2rem;">
+    <div class="section-label" style="margin-bottom:1rem;">大衆心理の分布（核心）</div>
+    <table class="player-table">
+      <thead><tr><th>プレイヤー</th><th>思考</th><th>行動</th><th>結果</th></tr></thead>
+      <tbody>
+        <tr><td>3波で勝った勢</td><td>「そろそろ逃げたい」</td><td>利確売り開始</td><td style="color:var(--red)">売り圧力↑</td></tr>
+        <tr><td>乗り遅れた勢</td><td>「今からでも乗りたい！」</td><td>新規買い</td><td style="color:var(--green)">燃料に</td></tr>
+        <tr><td>初心者</td><td>「ブレイク！買いだ！」</td><td>高値掴み</td><td style="color:var(--red)">損切り要因</td></tr>
+        <tr class="pro" style="background:rgba(201,168,76,0.05);">
+          <td><strong style="color:var(--gold2)">プロ</strong></td>
+          <td>「ここが売り場」</td>
+          <td><strong>静かに売り始める</strong></td>
+          <td style="color:var(--red)">売り圧力↑</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="quote-block">
+      「大衆が飛び乗る最後の上昇に、プロが売りをぶつけている場所」<br>
+      <small style="font-style:normal;color:var(--text-dim);font-size:0.8rem;">パターン②は「勝ち逃げポイント」。伸びに期待するパターンではない。</small>
+    </div>
+  </div>
+
+  <div class="do-dont fade-in">
+    <div class="do-box">
+      <h4>✅ やること</h4>
+      <ul>
+        <li>サポート反発で乗る</li>
+        <li>高値付近で終わる前提で取る</li>
+        <li>第一・第二レジスタンスで利確</li>
+      </ul>
+    </div>
+    <div class="dont-box">
+      <h4>❌ やってはいけないこと</h4>
+      <ul>
+        <li>欲張って長く持つ</li>
+        <li>ターゲット超えを期待する</li>
+        <li>サポート割れを無視して保有継続</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- PATTERN 3 -->
+<div class="divider"></div>
+<section style="background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:0;">
+  <div class="pattern-header" style="border-top-color:var(--p3);">
+    <div class="big-num" style="color:var(--p3);">3</div>
+    <div class="section-label" style="margin-bottom:0.8rem;">Pattern 03</div>
+    <h2 class="p3">パターン③ — 3波高値を超えない・ダブルボトム</h2>
+    <div class="tagline">燃料：損切りのみ（弱い・ターゲット浅め）</div>
+    <span class="tag-pill p3" style="border-color:var(--p3);">損切り主導の上昇</span>
+    <span class="tag-pill" style="color:var(--text-dim);border-color:var(--border);">早めに利確</span>
+  </div>
+</section>
+
+<section class="section" style="padding-top:3rem;">
+  <div class="fade-in">
+    <div class="section-label" style="margin-bottom:1rem;">①②③の決定的な違い</div>
+    <div class="struct-box">
+      5波が強く伸びる      →  <span class="hl">パターン①（トレンド継続）</span><br>
+      5波が限界まで伸びる  →  <span class="hl2">パターン②（最終局面）</span><br>
+      5波が弱く失速する    →  <span class="hl4">パターン③（損切り主導の上昇）</span><br><br>
+      <span class="comment">↓唯一の判断基準</span><br><br>
+      3波高値を超える  →  <span class="hl">① or ②</span><br>
+      3波高値を超えない →  <span class="hl4">③確定</span>
+    </div>
+  </div>
+
+  <div class="fade-in" style="margin-top:2rem;">
+    <div class="section-label" style="margin-bottom:1rem;">相場構造の正体（超重要）</div>
+    <div class="flow-chain">
+      <span class="step">サポート割れそう</span>
+      <span class="arrow">↓</span>
+      <span class="step">売り勢が入る（下落3波を狙う）</span>
+      <span class="arrow">↓</span>
+      <span class="step">割れないで反発</span>
+      <span class="arrow">↓</span>
+      <span class="step accent">売り勢の損切り発動</span>
+      <span class="arrow">↓</span>
+      <span class="step" style="color:var(--p3);">損切りが燃料になって上昇（＝5波） ←強いトレンドではない</span>
+    </div>
+    <div class="quote-block">
+      「上がるけど、期待してはいけない上昇」<br>
+      <small style="font-style:normal;color:var(--text-dim);font-size:0.8rem;">上昇の燃料が損切りのみ＝一時的・持続しない。3波高値を超えない前提でターゲット設定。</small>
+    </div>
+  </div>
+
+  <div class="do-dont fade-in">
+    <div class="do-box">
+      <h4>✅ やること</h4>
+      <ul>
+        <li>サポート反発の損切り発動を確認してから乗る</li>
+        <li>浅いターゲットで早めに利確</li>
+        <li>抜けなかったら即撤退</li>
+      </ul>
+    </div>
+    <div class="dont-box">
+      <h4>❌ やってはいけないこと</h4>
+      <ul>
+        <li>強いトレンドと同じ感覚で持ち続ける</li>
+        <li>3波高値超えを期待して欲張る</li>
+        <li>「まだいけるかも」で保有継続</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- PATTERN 4 -->
+<div class="divider"></div>
+<section style="background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:0;">
+  <div class="pattern-header" style="border-top-color:var(--p4);">
+    <div class="big-num" style="color:var(--p4);">4</div>
+    <div class="section-label" style="margin-bottom:0.8rem;">Pattern 04</div>
+    <h2 class="p4">パターン④ — パターン③の延長・2重サポート反発</h2>
+    <div class="tagline">燃料：含み損勢の決済（再現性が高い）</div>
+    <span class="tag-pill p4" style="border-color:var(--p4);">捕まった人の決済</span>
+    <span class="tag-pill" style="color:var(--text-dim);border-color:var(--border);">後出しでいい</span>
+  </div>
+</section>
+
+<section class="section" style="padding-top:3rem;">
+  <div class="fade-in">
+    <div class="section-label" style="margin-bottom:1rem;">なぜ2本のサポートがあるのか（核心）</div>
+    <p><strong>答え：「2種類の損している人」がいるから</strong></p>
+    <table class="player-table" style="margin-top:1rem;">
+      <thead><tr><th>サポート</th><th>捕まっている人</th><th>心理</th><th>行動</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong style="color:var(--p4)">上のサポート</strong></td>
+          <td>上で売った人（含み損）</td>
+          <td>「プラマイゼロで逃げたい」</td>
+          <td>逃げの決済 → <span style="color:var(--green)">買い圧力</span></td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--p4)">下のサポート</strong></td>
+          <td>もっと上で売った人（まだ逃げられていない）</td>
+          <td>「ここまで戻ったら逃げたい」</td>
+          <td>待機中の決済 → <span style="color:var(--green)">買い圧力</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="fade-in" style="margin-top:2rem;">
+    <div class="section-label" style="margin-bottom:1rem;">なぜ後出しでいいのか</div>
+    <div class="struct-box">
+      ポジションは外から見えない<br>
+      <span class="comment">↓</span><br>
+      上に溜まっているか？　下に溜まっているか？<br>
+      <span class="comment">↓　事前に判断不可能</span><br>
+      <span class="hl3">✅ 反応した方に後出しで乗る　←これが正解</span>
+    </div>
+    <div class="quote-block">
+      「5波を予測するのではなく、捕まった人が逃げる場所に先回りして乗るトレード」<br>
+      <small style="font-style:normal;color:var(--text-dim);font-size:0.8rem;">損している人は必ず行動する。だから再現性が高い。</small>
+    </div>
+  </div>
+
+  <div class="do-dont fade-in">
+    <div class="do-box">
+      <h4>✅ やること</h4>
+      <ul>
+        <li>反応したサポートに後出しで乗る</li>
+        <li>決済の動きを確認してからエントリー</li>
+        <li>N・場所の基準を固定して淡々と抜く</li>
+      </ul>
+    </div>
+    <div class="dont-box">
+      <h4>❌ やってはいけないこと</h4>
+      <ul>
+        <li>どちらのサポートか事前に決め打つ</li>
+        <li>ブレイク前に「継続するはず」で入る</li>
+        <li>感情で判断を変える</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- PATTERN 5 -->
+<div class="divider"></div>
+<section style="background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:0;">
+  <div class="pattern-header" style="border-top-color:var(--p5);">
+    <div class="big-num" style="color:var(--p5);">5</div>
+    <div class="section-label" style="margin-bottom:0.8rem;">Pattern 05</div>
+    <h2 class="p5">パターン⑤ — 下落1波安値割れ・チャネルライン内</h2>
+    <div class="tagline">燃料：間違ったトレンド認識の損切り（瞬発力高）</div>
+    <span class="tag-pill p5" style="border-color:var(--p5);">騙し下げの見極め</span>
+    <span class="tag-pill" style="color:var(--text-dim);border-color:var(--border);">待てる人だけが勝つ</span>
+  </div>
+</section>
+
+<section class="section" style="padding-top:3rem;">
+  <div class="fade-in">
+    <div class="section-label" style="margin-bottom:1rem;">④⑤の本質の違い</div>
+    <div class="struct-box">
+      捕まった人の決済を利用する       →  <span class="hl2">パターン④「逃げたい人」を使う</span><br>
+      間違ったトレンド認識の損切りを利用 →  <span class="p5">パターン⑤「間違えた人」を使う</span>
+    </div>
+  </div>
+
+  <div class="fade-in" style="margin-top:2rem;">
+    <div class="section-label" style="margin-bottom:1rem;">なぜチャネルを使うのか（超重要）</div>
+    <div class="struct-box">
+      通常のエリオット:  <span class="hl2">3波 ＞ 1波（3波が最も強い）</span><br>
+      パターン⑤:       <span class="p5">1波 ≒ 3波（同じ長さ）</span><br>
+      <span class="comment">  ↓</span><br>
+      <span class="hl3">「本物のトレンドじゃない可能性」が浮上</span><br>
+      <span class="comment">  ↓</span><br>
+      <span class="hl3">否定された時の損切りが一気に出る → 瞬発力の源</span>
+    </div>
+    <div class="flow-chain" style="margin-top:1.5rem;">
+      <span class="step">安値ブレイク否定</span>
+      <span class="arrow">↓</span>
+      <span class="step accent">売り勢の損切り発動（強制）</span>
+      <span class="arrow">↓</span>
+      <span class="step" style="color:var(--p5);">その燃料で上昇</span>
+      <span class="arrow">↓</span>
+      <span class="step" style="color:var(--green);">エントリー（ここだけ）</span>
+    </div>
+    <div class="quote-block">
+      「売り勢が間違えた瞬間、その損切りだけをもらう。それ以外は一切やらない。」<br>
+      <small style="font-style:normal;color:var(--text-dim);font-size:0.8rem;">このパターンで最も重要なのは「待てるかどうか」。確認する人だけが勝つ。</small>
+    </div>
+  </div>
+
+  <div class="do-dont fade-in">
+    <div class="do-box">
+      <h4>✅ やること</h4>
+      <ul>
+        <li>チャネルで下落リズムの弱さを確認</li>
+        <li>安値ブレイク否定を待ってから乗る</li>
+        <li>売り勢の損切り発動を燃料と認識する</li>
+      </ul>
+    </div>
+    <div class="dont-box">
+      <h4>❌ やってはいけないこと</h4>
+      <ul>
+        <li>チャネルタッチで早期エントリー</li>
+        <li>「押し目だろう」の主観で入る</li>
+        <li>下落継続の可能性を無視する</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- FUEL COMPARISON -->
+<div class="divider"></div>
+<section class="section">
+  <div class="section-label">5パターン比較</div>
+  <h2>上昇の燃料比較</h2>
+  <table class="fuel-table fade-in" style="margin-top:2rem;">
+    <thead>
+      <tr><th>パターン</th><th>上昇の燃料</th><th>特性</th><th>強度</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="p1">① サポレジ反発</span></td>
+        <td>新規買い＋売りの損切り</td>
+        <td><strong style="color:var(--p1)">最強</strong></td>
+        <td>
+          <div class="fuel-bar-wrap">
+            <div class="fuel-bar" style="width:140px;background:linear-gradient(90deg,var(--p1),rgba(61,217,217,0.3));"></div>
+            <span class="fuel-label">100%</span>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="p2">② サポート反発</span></td>
+        <td>乗り遅れの新規買い</td>
+        <td><strong style="color:var(--p2)">限界あり</strong></td>
+        <td>
+          <div class="fuel-bar-wrap">
+            <div class="fuel-bar" style="width:98px;background:linear-gradient(90deg,var(--p2),rgba(232,201,122,0.3));"></div>
+            <span class="fuel-label">70%</span>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="p3">③ ダブルボトム</span></td>
+        <td>下落狙い売りの損切りのみ</td>
+        <td><strong style="color:var(--p3)">弱い</strong></td>
+        <td>
+          <div class="fuel-bar-wrap">
+            <div class="fuel-bar" style="width:56px;background:linear-gradient(90deg,var(--p3),rgba(155,127,232,0.3));"></div>
+            <span class="fuel-label">40%</span>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="p4">④ 2重サポート</span></td>
+        <td>含み損勢の逃げ（決済）</td>
+        <td><strong style="color:var(--p4)">再現性高</strong></td>
+        <td>
+          <div class="fuel-bar-wrap">
+            <div class="fuel-bar" style="width:105px;background:linear-gradient(90deg,var(--p4),rgba(240,138,90,0.3));"></div>
+            <span class="fuel-label">75%</span>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="p5">⑤ 騙し下げ否定</span></td>
+        <td>間違ったトレンド認識の損切り</td>
+        <td><strong style="color:var(--p5)">瞬発力高</strong></td>
+        <td>
+          <div class="fuel-bar-wrap">
+            <div class="fuel-bar" style="width:119px;background:linear-gradient(90deg,var(--p5),rgba(224,85,147,0.3));"></div>
+            <span class="fuel-label">85%</span>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- CONCLUSION -->
+<div class="divider"></div>
+<section class="section" id="conclusion">
+  <div class="section-label">Section 03 — 核心メッセージ</div>
+  <h2>3つの核心</h2>
+
+  <div class="msg-cards">
+    <div class="msg-card fade-in" data-n="1">
+      <h3>「見る力」より「捨てる力」</h3>
+      <p>分かる相場を探すな。分からない相場を捨てろ。この2つを守るだけで無駄なトレードが8割消える。</p>
+    </div>
+    <div class="msg-card fade-in" data-n="2">
+      <h3>「後から考えるな、先に決めろ」</h3>
+      <p>相場が来る前にシナリオを全部決めておく。来たら従うだけ。解釈変更は一貫性崩壊＝負け確定。</p>
+    </div>
+    <div class="msg-card fade-in" data-n="3">
+      <h3>「形ではなく、場所で勝負する」</h3>
+      <p>良い形だから入る（❌）ではなく、場所が良いから入る（✅）。構造を理解してから動く。</p>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL RULES -->
+<div class="divider"></div>
+<section class="section fade-in">
+  <div class="section-label">最終ルール</div>
+  <h2>フィルター一覧</h2>
+
+  <div class="rules-grid" style="margin-top:2rem;">
+    <div class="rule-item">
+      <div class="label">FILTER 01 — マクロ環境</div>
+      <div class="value">日足と1時間足の方向が一致していること</div>
+    </div>
+    <div class="rule-item">
+      <div class="label">FILTER 02 — 水平線</div>
+      <div class="value">前日高値・安値のブレイクを確認すること</div>
+    </div>
+    <div class="rule-item">
+      <div class="label">FILTER 03 — パターン</div>
+      <div class="value">5波の鉄板形が出るまで待つこと</div>
+    </div>
+    <div class="rule-item" style="border:1px solid var(--red);background:var(--red-dim);">
+      <div class="label" style="color:var(--red)">PROHIBITED — 禁止事項</div>
+      <div class="value" style="color:var(--text-dim);">
+        半分戻し後のエントリー<br>
+        解釈変更<br>
+        感情的ナンピン
+      </div>
+    </div>
+  </div>
+
+  <div class="quote-block" style="margin-top:2rem; font-size:1rem;">
+    この2つを守るだけで<strong>無駄なトレードが8割消える。</strong><br>
+    <small style="font-style:normal;color:var(--text-dim);font-size:0.82rem;">
+      ① 日足と1時間足が一致　② 前日高値or安値をブレイク
+    </small>
+  </div>
+</section>
+
+<footer>
+  <div style="margin-bottom:0.4rem; color:var(--gold); opacity:0.45; letter-spacing:0.2em;">鉄板チャートパターン / TETSUBAN CHART PATTERN THEORY</div>
+  本資料はトレード教育目的の要約資料です。投資は自己責任のもとで行ってください。
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), 60);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.07 });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
